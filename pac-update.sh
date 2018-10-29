@@ -69,6 +69,7 @@ stop_paccoin() {
 	fi
 
     INSTALL_DIR="$HOME/.paccoincore"
+    sleep 5
 }
 
 check_crete_swap()
