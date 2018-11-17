@@ -4,6 +4,7 @@ export LC_ALL=en_US.UTF-8
 set -e
 version="0.12.5.1"
 old_version="0.12.5.0"
+INSTALL_DIR="/home/paccoin"
 
 if [ "$1" == "--testnet" ]; then
 	pac_rpc_port=17111
@@ -42,6 +43,8 @@ local_config()
 		read -p 'You did not provided masternode genkey, please provide one: ' mnkey
 		sleep 2
 	done
+	
+	mkdir -p $INSTALL_DIR
 }
 
 install_dependencies() 
@@ -80,19 +83,19 @@ configure_wallet()
 	echo "###############################"
 	echo ""
 	echo "The .paccoincore folder will be created, if folder already exists, it will be replaced"
-	if [ -d ~/.paccoincore ]; then
-		if [ -e ~/.paccoincore/paccoin.conf ]; then
+	if [ -d $INSTALL_DIR/.paccoincore ]; then
+		if [ -e $INSTALL_DIR/.paccoincore/paccoin.conf ]; then
 			read -p "The file paccoin.conf already exists and will be replaced. do you agree [y/n]:" cont
 			if [ $cont = 'y' ] || [ $cont = 'yes' ] || [ $cont = 'Y' ] || [ $cont = 'Yes' ]; then
-				sudo rm ~/.paccoincore/paccoin.conf
-				touch ~/.paccoincore/paccoin.conf
-				cd ~/.paccoincore
+				sudo rm $INSTALL_DIR/.paccoincore/paccoin.conf
+				touch $INSTALL_DIR/.paccoincore/paccoin.conf
+				cd $INSTALL_DIR/.paccoincore
 			fi
 		fi
 	else
 		echo "Creating .paccoincore dir"
-		mkdir -p ~/.paccoincore
-		cd ~/.paccoincore
+		mkdir -p $INSTALL_DIR/.paccoincore
+		cd $INSTALL_DIR/.paccoincore
 		touch paccoin.conf
 	fi
 
@@ -103,6 +106,7 @@ configure_wallet()
 	echo "rpcport=$pac_rpc_port" >> paccoin.conf
 	echo "externalip=$ipaddr" >> paccoin.conf
 	echo "port=$pac_port" >> paccoin.conf
+	echo "datadir=$INSTALL_DIR/.paccoincore" >> paccoin.conf
 	echo "server=1" >> paccoin.conf
 	echo "daemon=1" >> paccoin.conf
 	echo "listen=1" >> paccoin.conf
@@ -193,7 +197,6 @@ download_binaries()
 {
 	arch=`uname -m`
 	base_url="https://github.com/PACCommunity/PAC/releases/download/v${version}"
-	INSTALL_DIR='~/pac'
 	if [ "${arch}" == "x86_64" ]; then
 		tarball_name="PAC-v${version}-linux-x86_64.tar.gz"
 		binary_url="${base_url}/${tarball_name}"
@@ -254,7 +257,8 @@ install_sentinel()
 	echo "#     Running the sentinel    #"		
 	echo "###############################"
 	echo ""
-	cron="* * * * * cd ~/$INSTALL_DIR/sentinel && ./venv/bin/python bin/sentinel.py 2>&1 >> sentinel-cron.log"
+	cron="* * * * * cd $INSTALL_DIR/sentinel && ./venv/bin/python bin/sentinel.py 2>&1 >> sentinel-cron.log"
+	sentinel_conf="paccoin_conf=$INSTALL_DIR/.paccoincore/paccoin.conf"
 	cd $INSTALL_DIR
 	git clone "https://github.com/PACCommunity/sentinel"
 	cd sentinel
@@ -264,6 +268,7 @@ install_sentinel()
 	sleep 3
 	
 	sed -i "/* * */c $cron" crontab.txt
+	sed -i "/#paccoin_conf=/c $sentinel_conf" sentinel.conf
 	crontab 'crontab.txt'
 }
 
@@ -307,12 +312,13 @@ install_and_run_systemd_service()
 		PAC_SERVICE_NAME="pacd.service"
 	fi
 # 	CURRENT_USER="User=$USER"
-	EXEC_START_CMD="ExecStart=$INSTALL_DIR/paccoind -daemon -conf=$CONF_PATH -datadir=$DATA_DIR -pid=/run/paccoind/paccoind.pid"
+	EXEC_START_CMD="ExecStart=$INSTALL_DIR/paccoind -daemon -conf=$INSTALL_DIR/.paccoincore/paccoin.conf -datadir=$INSTALL_DIR/.paccoincore -pid=/run/paccoind/paccoind.pid"
 	PAC_SERVICE_URL="https://raw.githubusercontent.com/PACCommunity/PAC/master/contrib/init/paccoind.service"
 	wget --no-check-certificate --show-progress -q -O $PAC_SERVICE_NAME $PAC_SERVICE_URL 
 # 	sed -i "/User=/c $CURRENT_USER" $PAC_SERVICE_NAME
 	sed -i "/ExecStart=/c $EXEC_START_CMD" $PAC_SERVICE_NAME
 	sudo cp $PAC_SERVICE_NAME /etc/systemd/system/$PAC_SERVICE_NAME
+	chown -R paccoin: $INSTALL_DIR
 	sudo systemctl enable $PAC_SERVICE_NAME
 	sudo systemctl start $PAC_SERVICE_NAME
 	sleep 5
