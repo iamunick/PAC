@@ -2,7 +2,7 @@
 
 export LC_ALL=en_US.UTF-8
 set -e
-version="0.12.5.1"
+version="0.12.6.0"
 
 echo 
 echo "################################################"
@@ -207,7 +207,8 @@ install_and_run_systemd_service()
 	rm $PAC_SERVICE_NAME
 	echo 
 	echo "==> PAC Updated!"
-	echo "==> Remember to go to your cold wallet and start the masternode (cold wallet must also be on the latest version)."
+	echo "==> If you are upgrading from 12.5 (Protocol 7014) You are all set!, nothing left to do."
+	echo "==> If you are upgrading from the older Protocol 7013, Remember to go to your cold wallet and start the masternode (cold wallet must also be on the latest version)."
 }
 
 stop_paccoin
