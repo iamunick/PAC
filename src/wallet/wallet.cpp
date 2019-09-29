@@ -3342,6 +3342,9 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
         if (recipient.nAmount < COIN && fStandardTx == true)
         {
+          if( GetBoolArg("-testnet", false) )
+            return true;
+
             strFailReason = _("Output amounts must be equal to or greater than 1 PAC");
             return false;
         }
@@ -4210,7 +4213,7 @@ bool CWallet::SetDefaultKey(const CPubKey &vchPubKey)
 
 /**
  * Mark old keypool keys as used,
- * and generate all new keys 
+ * and generate all new keys
  */
 bool CWallet::NewKeyPool()
 {
@@ -5599,4 +5602,3 @@ bool CMerkleTx::AcceptToMemoryPool(const CAmount& nAbsurdFee, CValidationState& 
 {
     return ::AcceptToMemoryPool(mempool, state, tx, true, NULL, false, nAbsurdFee);
 }
-

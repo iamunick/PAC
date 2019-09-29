@@ -81,8 +81,8 @@ libconftest.dylib*
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-dash-qt
-Dash-Qt.app
+pacglobal-qt
+PACGlobal-Qt.app
 !/depends/Makefile
 
 # Unit-tests
@@ -126,9 +126,9 @@ src/qt/dash-qt.bash
 qa/pull-tester/tests-config.sh
 
 #development symlinks
-dash-cli
-dashd
-dash-qt
+pacglobal-cli
+pacglobald
+pacglobal-qt
 make
 
 /docker/bin
