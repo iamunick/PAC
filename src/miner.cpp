@@ -617,7 +617,6 @@ void static BitcoinMiner(const CChainParams& chainparams, CConnman& connman, CWa
             BlockAssembler assembler(chainparams);
             auto pblocktemplate = assembler.CreateNewBlock(coinbaseScript->reserveScript, fProofOfStake);
             if (!pblocktemplate.get()) {
-                LogPrintf("PACminer -- Failed to find a coinstake\n");
                 MilliSleep(5000);
                 continue;
             }

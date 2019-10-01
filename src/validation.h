@@ -600,4 +600,7 @@ bool IsPoS();
 //! Return the current minimum relay tx fee
 CFeeRate CurrentRelayFee();
 
+//! Returns confirmations required to spend coinbase
+int ConfirmationsPerNetwork();
+
 #endif // BITCOIN_VALIDATION_H

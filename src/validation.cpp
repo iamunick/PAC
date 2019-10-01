@@ -538,13 +538,6 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
         }
     }
 
-    // Enforce minimum output size
-    if (IsPoS() && tx.nType == TRANSACTION_NORMAL && Params().NetworkIDString() != CBaseChainParams::TESTNET) {
-        for (const auto& txout : tx.vout)
-            if (txout.nValue < COIN)
-                return state.DoS(0, false, REJECT_INVALID, "we-dont-relay-dust");
-    }
-
     // Basic checks that don't depend on any context
     if (!allowEmptyTxInOut && tx.vin.empty())
         return state.DoS(10, false, REJECT_INVALID, "bad-txns-vin-empty");
@@ -856,15 +849,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool min fee not met", false, strprintf("%d < %d", nFees, mempoolRejectFee));
         }
 
-        // No transactions are allowed below minRelayTxFee except from disconnected blocks (or unless tx.nType != TRANSACTION_NORMAL)
-        if (fLimitFree && nModifiedFees < MinRelayFee().GetFee(nSize) && (tx.nType == TRANSACTION_NORMAL)) {
-            return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "min relay fee not met");
-        }
-
-        if (nAbsurdFee && nFees > nAbsurdFee)
-            return state.Invalid(false,
-                REJECT_HIGHFEE, "absurdly-high-fee",
-                strprintf("%d > %d", nFees, nAbsurdFee));
+	// No transactions are allowed below minRelayTxFee except from disconnected blocks
+	if (tx.nType == TRANSACTION_NORMAL) {
+	   if (fLimitFree && nModifiedFees < MinRelayFee().GetFee(nSize))
+	      return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "min relay fee not met");
+	   if (nAbsurdFee && nFees > nAbsurdFee)
+	      return state.Invalid(false, REJECT_HIGHFEE, "absurdly-high-fee", strprintf("%d > %d", nFees, nAbsurdFee));
+	}
 
         // Calculate in-mempool ancestors, up to a limit.
         CTxMemPool::setEntries setAncestors;
@@ -1431,7 +1422,7 @@ bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoins
 
             // If prev is coinbase, check that it's matured
             if (coin.IsCoinBase()) {
-                if (nSpendHeight - coin.nHeight < COINBASE_MATURITY)
+                if (nSpendHeight - coin.nHeight < ConfirmationsPerNetwork())
                     return state.Invalid(false,
                         REJECT_INVALID, "bad-txns-premature-spend-of-coinbase",
                         strprintf("tried to spend coinbase at depth %d", nSpendHeight - coin.nHeight));
@@ -4921,6 +4912,12 @@ bool IgnoreSigopsLimits(int nHeight) {
 //! Returns true if we have entered PoS consensus state
 bool IsPoS() {
    return (chainActive.Height() > Params().GetConsensus().nLastPoWBlock);
+}
+
+//! Returns confirmations required to spend coinbase
+int ConfirmationsPerNetwork() {
+    return (Params().NetworkIDString() ==
+            CBaseChainParams::TESTNET ? 20 : 100);
 }
 
 class CMainCleanup

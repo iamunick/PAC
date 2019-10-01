@@ -2911,7 +2911,7 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool ov
 
     CReserveKey reservekey(this);
     CWalletTx wtx;
-    if (!CreateTransaction(vecSend, wtx, reservekey, nFeeRet, nChangePosInOut, strFailReason, &coinControl, false, ALL_COINS, false, nExtraPayloadSize, (tx.nType == TRANSACTION_NORMAL)))
+    if (!CreateTransaction(vecSend, wtx, reservekey, nFeeRet, nChangePosInOut, strFailReason, &coinControl, false, ALL_COINS, false, nExtraPayloadSize))
         return false;
 
     if (nChangePosInOut != -1)
@@ -3319,12 +3319,17 @@ bool CWallet::ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecA
 }
 
 bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
-                                int& nChangePosInOut, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstaPAC, int nExtraPayloadSize, bool fStandardTx)
+                                int& nChangePosInOut, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstaPAC, int nExtraPayloadSize)
 {
     if (!llmq::IsOldInstaPACEnabled()) {
         // The new system does not require special handling for InstaPAC as this is all done in CInstaPACManager.
         // There is also no need for an extra fee anymore.
         fUseInstaPAC = false;
+    }
+
+    if (nExtraPayloadSize > 0 && chainActive.Height() < Params().GetConsensus().DIP0003Height) {
+	strFailReason = _("The DIP0003 activation height has not been met.");
+        return false;
     }
 
     CAmount nFeePay = fUseInstaPAC ? CTxLockRequest().GetMinFee(true) : 0;
@@ -3340,7 +3345,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
             return false;
         }
 
-        if (recipient.nAmount < COIN && fStandardTx == true)
+        if (recipient.nAmount < COIN && nExtraPayloadSize == 0)
         {
           if( GetBoolArg("-testnet", false) )
             return true;
@@ -3814,7 +3819,7 @@ bool CWallet::SelectStakeCoins(StakeCoinsSet &setCoins, CAmount nTargetAmount, c
         if (GetTime() - out.tx->GetTxTime() < Params().GetConsensus().nStakeMinAge)
             continue;
 
-        if (out.nDepth < (out.tx->tx->IsCoinStake() ? COINBASE_MATURITY : 10))
+        if (out.nDepth < (out.tx->tx->IsCoinStake() ? ConfirmationsPerNetwork() : 10))
             continue;
 
 	// not a consensus-test, just prevention
@@ -3928,7 +3933,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, CAm
     }
 
     if(!fKernelFound) {
-        LogPrintf("Failed to find a coinstake");
+        LogPrintf("Failed to find a coinstake\n");
         return false;
     }
 
@@ -5594,7 +5599,7 @@ int CMerkleTx::GetBlocksToMaturity() const
 {
     if (!IsCoinBase() && !IsCoinStake())
         return 0;
-    return std::max(0, (COINBASE_MATURITY+1) - GetDepthInMainChain());
+    return std::max(0, (ConfirmationsPerNetwork()+1) - GetDepthInMainChain());
 }
 
 

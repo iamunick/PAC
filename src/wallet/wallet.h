@@ -1001,7 +1001,7 @@ public:
      * @note passing nChangePosInOut as -1 will result in setting a random position
      */
     bool CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                           std::string& strFailReason, const CCoinControl *coinControl = NULL, bool sign = true, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstaPAC=false, int nExtraPayloadSize = 0, bool fStandardTx = true);
+                           std::string& strFailReason, const CCoinControl *coinControl = NULL, bool sign = true, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstaPAC=false, int nExtraPayloadSize = 0);
     bool CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, CAmount blockReward,
                          CMutableTransaction& txNew, unsigned int& nTxNewTime,
                          std::vector<const CWalletTx *> &vwtxPrev);

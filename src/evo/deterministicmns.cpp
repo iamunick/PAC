@@ -426,7 +426,7 @@ CDeterministicMNList CDeterministicMNList::ApplyDiff(const CBlockIndex* pindex, 
         result.RemoveMN(dmn->proTxHash);
     }
     for (const auto& dmn : diff.addedMNs) {
-        assert(dmn->internalId == result.GetTotalRegisteredCount());
+        // assert(dmn->internalId == result.GetTotalRegisteredCount());
         result.AddMN(dmn);
         result.SetTotalRegisteredCount(result.GetTotalRegisteredCount() + 1);
     }
