@@ -3785,6 +3785,9 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     uint256 hashProofOfStake = uint256();
     if (block.IsProofOfStake())
     {
+	if(block.GetHash() == hashProofOfStake)
+	   return state.DoS(100, error("CheckBlock(): invalid proof of stake block\n"));
+
         if(!CheckProofOfStake(block, hashProofOfStake))
            return state.DoS(100, error("CheckBlock(): check proof-of-stake failed for block %s\n", hashProofOfStake.ToString().c_str()));
 

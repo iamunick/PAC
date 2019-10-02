@@ -118,6 +118,7 @@ std::string CMasternodeMetaMan::ToString() const
     std::ostringstream info;
 
     info << "Masternodes: meta infos object count: " << (int)metaInfos.size() <<
+         ", deterministic masternode count: " << deterministicMNManager->GetListAtChainTip().GetAllMNsCount() <<
          ", nDsqCount: " << (int)nDsqCount;
     return info.str();
 }

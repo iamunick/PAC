@@ -6,13 +6,13 @@ reset-files.bash
 *.tar.gz
 
 *.exe
-src/dash
-src/dashd
-src/dash-cli
-src/dash-tx
-src/test/test_dash
-src/qt/test/test_dash-qt
-src/bench/bench_dash
+src/pacglobal
+src/pacglobal
+src/pacglobal-cli
+src/pacglobal-tx
+src/test/test_pacglobal
+src/qt/test/test_pacglobal-qt
+src/bench/bench_pacglobal
 
 # autoreconf
 Makefile.in
@@ -35,8 +35,8 @@ config.log
 config.status
 configure
 libtool
-src/config/dash-config.h
-src/config/dash-config.h.in
+src/config/pacglobal-config.h
+src/config/pacglobal-config.h.in
 src/config/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
@@ -87,7 +87,7 @@ PACGlobal-Qt.app
 
 # Unit-tests
 Makefile.test
-dash-qt_test
+pacglobal-qt_test
 src/test/buildenv.py
 
 # Resources cpp
@@ -96,12 +96,14 @@ qrc_*.cpp
 # Mac specific
 .DS_Store
 build
+dist/
+*.background.tiff
 
 #lcov
 *.gcno
 *.gcda
 /*.info
-test_dash.coverage/
+test_pacglobal.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -120,9 +122,9 @@ qa/cache/*
 .autotools
 /doc/doxygen/
 
-libdashconsensus.pc
+libpacglobalconsensus.pc
 contrib/devtools/split-debug.sh
-src/qt/dash-qt.bash
+src/qt/pacglobal-qt.bash
 qa/pull-tester/tests-config.sh
 
 #development symlinks

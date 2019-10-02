@@ -223,6 +223,7 @@ public:
         consensus.nGovernanceFilterElements = 20000;
         consensus.nMasternodeMinimumConfirmations = 15;
         consensus.nMasternodeCollateral = 500000 * COIN;
+        consensus.nCollateralBugHeight = 331460;
         consensus.BIP34Height = 951;
         consensus.BIP34Hash = uint256S("0x000001f35e70f7c5705f64c6c5cc3dea9449e74d5b5c7cf74dad1bcca14a8012");
         consensus.BIP65Height = 619382;
@@ -373,6 +374,7 @@ public:
             (  280000,  uint256S("0x0000000000003b2680a18e08c41719206c76b05e2eb32f8aa45730246d63b2b7"))
             (  290000,  uint256S("0x00000000000069c1ef2e4f3122e6021177b581fd944c174390f1d3cdcdcc6722"))
             (  300000,  uint256S("0x0000000000001f4f2650510e1ad032f356d2fcb001aafcd5e13a87a259f8e15e"))
+            (  331000,  uint256S("0xec03918f66618c53742a0638d976b2b56807d3e3ca7a7de2d72e920f02fe521e"))
         };
 
         chainTxData = ChainTxData{
@@ -410,6 +412,7 @@ public:
         consensus.nGovernanceFilterElements = 500;
         consensus.nMasternodeMinimumConfirmations = 15;
         consensus.nMasternodeCollateral = 5000 * COIN;
+        consensus.nCollateralBugHeight = 0;
         consensus.BIP34Height = 1;
         consensus.BIP34Hash = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
         consensus.BIP65Height = 0;
@@ -575,6 +578,7 @@ public:
         consensus.nGovernanceFilterElements = 500;
         consensus.nMasternodeMinimumConfirmations = 1;
         consensus.nMasternodeCollateral = 500000 * COIN;
+        consensus.nCollateralBugHeight = 0;
         consensus.BIP34Height = 1; // BIP34 activated immediately on devnet
         consensus.BIP65Height = 1; // BIP65 activated immediately on devnet
         consensus.BIP66Height = 1; // BIP66 activated immediately on devnet

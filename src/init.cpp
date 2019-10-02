@@ -1812,8 +1812,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     break;
                 }
 
-                deterministicMNManager->UpgradeDBIfNeeded();
-
                 uiInterface.InitMessage(_("Verifying blocks..."));
                 if (fHavePruned && GetArg("-checkblocks", DEFAULT_CHECKBLOCKS) > MIN_BLOCKS_TO_KEEP) {
                     LogPrintf("Prune: pruned datadir may not have more than %d blocks; only checking available blocks",
@@ -2115,7 +2113,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     threadGroup.create_thread(boost::bind(&ThreadSendAlert, boost::ref(connman)));
 
 #ifdef ENABLE_WALLET
-    if(GetBoolArg("-staking", true)) {
+    if(!fMasternodeMode && GetBoolArg("-staking", true)) {
         threadGroup.create_thread(std::bind(&ThreadStakeMinter, boost::ref(chainparams), boost::ref(connman)));
     }
 #endif

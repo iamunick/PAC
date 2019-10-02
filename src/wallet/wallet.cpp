@@ -3822,6 +3822,10 @@ bool CWallet::SelectStakeCoins(StakeCoinsSet &setCoins, CAmount nTargetAmount, c
         if (out.nDepth < (out.tx->tx->IsCoinStake() ? ConfirmationsPerNetwork() : 10))
             continue;
 
+	// do not select the collateral
+	if (out.tx->tx->vout[out.i].nValue == Params().GetConsensus().nMasternodeCollateral)
+	    continue;
+
 	// not a consensus-test, just prevention
 	if (out.tx->tx->vout[out.i].nValue < Params().GetConsensus().nMinimumStakeValue)
 	    continue;
