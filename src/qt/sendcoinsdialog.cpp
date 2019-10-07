@@ -29,6 +29,8 @@
 #include <QScrollBar>
 #include <QSettings>
 #include <QTextDocument>
+#include <QClipboard>
+#include <QToolTip>
 
 SendCoinsDialog::SendCoinsDialog(const PlatformStyle *platformStyle, QWidget *parent) :
     QDialog(parent),
@@ -42,6 +44,13 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *platformStyle, QWidget *pa
     ui->setupUi(this);
     QString theme = GUIUtil::getThemeName();
 
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
+
     if (!platformStyle->getImagesOnButtons()) {
         ui->addButton->setIcon(QIcon());
         ui->clearButton->setIcon(QIcon());
@@ -52,7 +61,12 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *platformStyle, QWidget *pa
         ui->sendButton->setIcon(QIcon(":/icons/" + theme + "/send"));
     }
 
+
+    ui->iconLabelConvertedCurrency->setPixmap(QPixmap(":icons/bitcoin-32"));
+    ui->iconLabelAvailableBalance->setPixmap(QPixmap(":icons/bitcoin-32"));
+    
     GUIUtil::setupAddressWidget(ui->lineEditCoinControlChange, this);
+    colorCount = 0;
 
     addEntry();
 
@@ -438,6 +452,7 @@ void SendCoinsDialog::clear()
     {
         ui->entries->takeAt(0)->widget()->deleteLater();
     }
+    colorCount = 0;
     addEntry();
 
     updateTabsAndLabels();
@@ -455,7 +470,12 @@ void SendCoinsDialog::accept()
 
 SendCoinsEntry *SendCoinsDialog::addEntry()
 {
+    colorCount++;
     SendCoinsEntry *entry = new SendCoinsEntry(platformStyle, this);
+    
+    if(colorCount!=1){
+        entry->setStyleSheet("#SendCoinsEntry { border-top: 3px solid #474747; }");
+    }
     entry->setModel(model);
     ui->entries->addWidget(entry);
     connect(entry, SIGNAL(removeEntry(SendCoinsEntry*)), this, SLOT(removeEntry(SendCoinsEntry*)));
@@ -492,6 +512,7 @@ void SendCoinsDialog::removeEntry(SendCoinsEntry* entry)
     entry->deleteLater();
 
     updateTabsAndLabels();
+    colorCount--;
 }
 
 QWidget *SendCoinsDialog::setupTabChain(QWidget *prev)
@@ -582,8 +603,10 @@ void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& unconfir
 	    } else {
 		    bal = balance;
 	    }
-
-        ui->labelBalance->setText(BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), bal));
+        // Sets the value of PACs
+        ui->labelBalance->setText(BitcoinUnits::floorHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), bal, false, BitcoinUnits::separatorAlways));
+        // Sets the value in USD
+        ui->labelAvailableUSD->setText("$ " + BitcoinUnits::pacToUsd(bal) + " USD");
     }
 }
 
@@ -727,11 +750,25 @@ void SendCoinsDialog::updateFeeMinimizedLabel()
     if(!model || !model->getOptionsModel())
         return;
 
-    if (ui->radioSmartFee->isChecked())
-        ui->labelFeeMinimized->setText(ui->labelSmartFee->text());
-    else {
-        ui->labelFeeMinimized->setText(BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), ui->customFee->value()) +
-            ((ui->radioCustomPerKilobyte->isChecked()) ? "/kB" : ""));
+    if (ui->radioSmartFee->isChecked()){
+        QString feeMinimized = ui->labelSmartFee->text();
+        QStringList list1 = feeMinimized.split('.');
+        QStringList list2 = list1[1].split(' ');
+        if(list2[0].toInt()==0){
+            ui->labelFeeMinimized->setText(list1[0] + ".00" + list2[1]);
+        }else{
+            ui->labelFeeMinimized->setText(feeMinimized);
+        }
+    }else {
+        QString feeMinimized = BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), ui->customFee->value()) + ((ui->radioCustomPerKilobyte->isChecked()) ? "/kB" : "");
+        QStringList list1 = feeMinimized.split('.');
+        QStringList list2 = list1[1].split(' ');
+        if(list2[0].toInt()==0){
+            ui->labelFeeMinimized->setText(list1[0] + ".00" + list2[1]);
+        }else{
+            ui->labelFeeMinimized->setText(feeMinimized);
+        }
+        
     }
 }
 
@@ -935,13 +972,53 @@ void SendCoinsDialog::coinControlUpdateLabels()
 
         // show coin control stats
         ui->labelCoinControlAutomaticallySelected->hide();
-        ui->widgetCoinControl->show();
+        ui->scrollAreaCoinControl->show();
     }
     else
     {
         // hide coin control stats
         ui->labelCoinControlAutomaticallySelected->show();
-        ui->widgetCoinControl->hide();
+        ui->scrollAreaCoinControl->hide();
         ui->labelCoinControlInsuffFunds->hide();
     }
+}
+
+void SendCoinsDialog::on_lineConvertCurrency_textChanged(const QString &arg1)
+{
+    bool ok;
+    double dbal;
+    dbal = arg1.toDouble(&ok);
+    if(ok){
+        QSettings settings;
+        double dval = (settings.value("PACvalue").toString()).toDouble();
+        QString sconv = QString::number(dbal/dval, 'g', 17);
+
+        QStringList list1 = sconv.split('.');
+        int q_size = list1[0].size();
+            for (int i = 3; i < q_size; i += 3)
+                list1[0].insert(q_size - i, ',');
+        if(list1.length() == 1){
+            ui->labelConvertionUSD->setText(list1[0]);
+        }else{
+            ui->labelConvertionUSD->setText(list1[0] + '.' + list1[1].left(8));
+        }
+    }else{
+        ui->labelConvertionUSD->setText("0.0");
+    }
+}
+
+/** Receive the signal to update the USD value when the USD-PAC value is updated */
+void SendCoinsDialog::receive_from_walletview()
+{
+    ui->labelAvailableUSD->setText("$ " + BitcoinUnits::pacToUsd(model->getBalance()) + " USD");
+}
+
+/** Copy the value of the convertion of USD to PAC to the clipboard */
+void SendCoinsDialog::on_copyPacs_clicked()
+{
+    QClipboard *clip = QApplication::clipboard();
+    QString input = ui->labelConvertionUSD->text();
+    input.replace( ",", " " );
+    clip->setText(input);
+    QToolTip::showText(ui->copyPacs->mapToGlobal(QPoint(10,10)), "Copied PACs to clipboard!",ui->copyPacs);
 }

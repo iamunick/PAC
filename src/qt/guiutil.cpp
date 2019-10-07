@@ -17,6 +17,9 @@
 #include "script/script.h"
 #include "script/standard.h"
 #include "util.h"
+#include "guiconstants.h"
+#include <iostream>
+#include <string>
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT
@@ -88,6 +91,14 @@ QString dateTimeStr(const QDateTime &date)
 {
     return date.date().toString(Qt::SystemLocaleShortDate) + QString(" ") + date.toString("hh:mm");
 }
+QString timeStr(const QDateTime &date)
+{
+    return date.toString("hh:mm");
+}
+QString dateStr(const QDateTime &date)
+{
+    return date.date().toString(Qt::SystemLocaleShortDate);
+}
 
 QString dateTimeStr(qint64 nTime)
 {
@@ -113,11 +124,13 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 {
     parent->setFocusProxy(widget);
 
-    widget->setFont(fixedPitchFont());
+    QString fontType = GUIUtil::getFontName();
+    widget->setFont(QFont(fontType,14, QFont::Medium, false));
+    //widget->setFont(fixedPitchFont());
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a $PAC address (e.g. %1)").arg("XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg"));
+    widget->setPlaceholderText(QObject::tr("Enter a $PAC address (e.g. %1)").arg("P96Vyav6w6rRJCwsDG49R3WgN2pTuie4dv"));
 #endif
     widget->setValidator(new BitcoinAddressEntryValidator(parent));
     widget->setCheckValidator(new BitcoinAddressCheckValidator(parent));
@@ -898,6 +911,15 @@ void restoreWindowGeometry(const QString& strSetting, const QSize& defaultSize, 
     }
 }
 
+QFont getCustomSelectedFont()
+{
+    QString fontType = getFontName();
+    std::cout << "font name: " << fontType.toStdString() << std::endl;
+    QFont font = QFont(fontType,14, QFont::Normal, false);
+    font.setPixelSize(14);
+    return font;
+}
+
 // Return name of current UI-theme or default theme if no theme was found
 QString getThemeName()
 {
@@ -907,7 +929,26 @@ QString getThemeName()
     if(!theme.isEmpty()){
         return theme;
     }
-    return QString("light");  
+    return QString("pac");
+}
+void setGUITextColor(){
+    QString theme = getThemeName();
+    if( theme.toStdString().compare("pac") == 0 )
+        COLOR_TEXT = QColor(255,255,255);
+    else
+        COLOR_TEXT = QColor(20,20,20);
+}
+
+// Return name of current UI-theme or default theme if no theme was found
+QString getFontName()
+{
+    QSettings settings;
+    QString FontType = settings.value("FontType", "").toString();
+
+    if(!FontType.isEmpty()){
+        return FontType;
+    }
+    return QString("Volte Rounded");
 }
 
 // Open CSS when configured
@@ -919,18 +960,18 @@ QString loadStyleSheet()
     QString theme = settings.value("theme", "").toString();
 
     if(!theme.isEmpty()){
-        cssName = QString(":/css/") + theme; 
+        cssName = QString(":/css/" + theme);
     }
     else {
-        cssName = QString(":/css/light");  
-        settings.setValue("theme", "light");
+        cssName = QString(":/css/pac");
+        settings.setValue("theme", "pac");
     }
     
     QFile qFile(cssName);      
     if (qFile.open(QFile::ReadOnly)) {
         styleSheet = QLatin1String(qFile.readAll());
     }
-        
+    setGUITextColor();
     return styleSheet;
 }
 

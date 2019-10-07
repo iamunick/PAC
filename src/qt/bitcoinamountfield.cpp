@@ -27,8 +27,8 @@ public:
         currentUnit(BitcoinUnits::PAC),
         singleStep(100000) // satoshis
     {
-        setAlignment(Qt::AlignRight);
-
+        setAlignment(Qt::AlignHCenter);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         connect(lineEdit(), SIGNAL(textEdited(QString)), this, SIGNAL(valueChanged()));
     }
 
@@ -49,7 +49,7 @@ public:
         if(valid)
         {
             input = BitcoinUnits::format(currentUnit, val, false, BitcoinUnits::separatorAlways);
-            lineEdit()->setText(input);
+            lineEdit()->setText(input.replace( ",", " " ));
         }
     }
 
@@ -60,7 +60,7 @@ public:
 
     void setValue(const CAmount& value)
     {
-        lineEdit()->setText(BitcoinUnits::format(currentUnit, value, false, BitcoinUnits::separatorAlways));
+        lineEdit()->setText((BitcoinUnits::format(currentUnit, value, false, BitcoinUnits::separatorAlways)).replace( ",", " " ));
         Q_EMIT valueChanged();
     }
 
@@ -99,7 +99,7 @@ public:
 
             const QFontMetrics fm(fontMetrics());
             int h = lineEdit()->minimumSizeHint().height();
-            int w = fm.width(BitcoinUnits::format(BitcoinUnits::PAC, BitcoinUnits::maxMoney(), false, BitcoinUnits::separatorAlways));
+            int w = fm.width((BitcoinUnits::format(BitcoinUnits::PAC, BitcoinUnits::maxMoney(), false, BitcoinUnits::separatorAlways)).replace( ",", " " ));
             w += 2; // cursor blinking space
 
             QStyleOptionSpinBox opt;
@@ -197,7 +197,6 @@ BitcoinAmountField::BitcoinAmountField(QWidget *parent) :
     amount = new AmountSpinBox(this);
     amount->setLocale(QLocale::c());
     amount->installEventFilter(this);
-    amount->setMaximumWidth(170);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(amount);

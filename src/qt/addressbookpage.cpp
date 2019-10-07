@@ -31,6 +31,14 @@ AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode mode, 
 {
     QString theme = GUIUtil::getThemeName();
     ui->setupUi(this);
+
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
+
     if (!platformStyle->getImagesOnButtons()) {
         ui->newAddress->setIcon(QIcon());
         ui->copyAddress->setIcon(QIcon());
@@ -42,7 +50,8 @@ AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode mode, 
         ui->deleteAddress->setIcon(QIcon(":/icons/" + theme + "/remove"));
         ui->exportButton->setIcon(QIcon(":/icons/" + theme + "/export"));
     }
-
+    ui->tableView->setShowGrid(false);
+    ui->tableView->setAlternatingRowColors(false);
     switch(mode)
     {
     case ForSelection:
@@ -134,6 +143,7 @@ void AddressBookPage::setModel(AddressTableModel *model)
     }
     ui->tableView->setModel(proxyModel);
     ui->tableView->sortByColumn(0, Qt::AscendingOrder);
+
 
     // Set column widths
 #if QT_VERSION < 0x050000

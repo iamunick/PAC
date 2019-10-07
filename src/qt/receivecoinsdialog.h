@@ -6,6 +6,7 @@
 #define BITCOIN_QT_RECEIVECOINSDIALOG_H
 
 #include "guiutil.h"
+#include "receiverequestdialog.h"
 
 #include <QDialog>
 #include <QHeaderView>
@@ -14,6 +15,8 @@
 #include <QMenu>
 #include <QPoint>
 #include <QVariant>
+#include <QImage>
+#include <QLabel>
 
 class OptionsModel;
 class PlatformStyle;
@@ -46,9 +49,11 @@ public:
     void setModel(WalletModel *model);
 
 public Q_SLOTS:
+    void copyAddress();
     void clear();
     void reject();
     void accept();
+    void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchBalance, const CAmount& watchUnconfirmedBalance, const CAmount& watchImmatureBalance);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -58,11 +63,18 @@ private:
     GUIUtil::TableViewLastColumnResizingFixer *columnResizingFixer;
     WalletModel *model;
     QMenu *contextMenu;
+    CAmount currentBalance;
     const PlatformStyle *platformStyle;
 
     QModelIndex selectedRow();
     void copyColumnToClipboard(int column);
     virtual void resizeEvent(QResizeEvent *event);
+    void generateRequestCoins();
+    void createQRCodeImage(int height);
+    QRImageWidget *lblQRCode;
+    int QRCodeLabelSize;
+    bool wasQRCodeGeneratedAlready;
+    QString uri;
 
 private Q_SLOTS:
     void on_receiveButton_clicked();
@@ -76,6 +88,7 @@ private Q_SLOTS:
     void copyLabel();
     void copyMessage();
     void copyAmount();
+    void receive_from_walletview();
 };
 
 #endif // BITCOIN_QT_RECEIVECOINSDIALOG_H

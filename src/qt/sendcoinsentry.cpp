@@ -34,6 +34,13 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *platformStyle, QWidget *pare
 
     QString theme = GUIUtil::getThemeName();
 
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
+
     // These icons are needed on Mac also!
     ui->addressBookButton->setIcon(QIcon(":/icons/" + theme + "/address-book"));
     ui->pasteButton->setIcon(QIcon(":/icons/" + theme + "/editpaste"));

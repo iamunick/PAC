@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>382</height>
+    <height>398</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,15 +79,37 @@
               <number>0</number>
              </property>
              <item>
+              <widget class="QWidget" name="widget" native="true">
+               <property name="styleSheet">
+                <string notr="true">border-image:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="warningIcon">
                <property name="enabled">
                 <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>55</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border:0px;</string>
                </property>
                <property name="text">
                 <string/>
                </property>
                <property name="icon">
-                <iconset>
+                <iconset resource="../paccoin.qrc">
                  <normaloff>:/icons/warning</normaloff>
                  <disabledoff>:/icons/warning</disabledoff>:/icons/warning</iconset>
                </property>
@@ -349,6 +371,12 @@
              <property name="text">
               <string>Hide</string>
              </property>
+             <property name="default">
+              <bool>false</bool>
+             </property>
+             <property name="flat">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
           </layout>
@@ -386,6 +414,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../paccoin.qrc"/>
+ </resources>
  <connections/>
 </ui>

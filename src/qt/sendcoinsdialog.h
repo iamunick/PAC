@@ -61,10 +61,13 @@ private:
     Ui::SendCoinsDialog *ui;
     ClientModel *clientModel;
     WalletModel *model;
+    int colorCount;
     bool fNewRecipientAllowed;
     void send(QList<SendCoinsRecipient> recipients, QString strFee, QString strFunds);
     bool fFeeMinimized;
     const PlatformStyle *platformStyle;
+
+    uint64_t *bal;
 
     // Process WalletModel::SendCoinsReturn and generate a pair consisting
     // of a message and message flags for use in Q_EMIT message().
@@ -97,6 +100,11 @@ private Q_SLOTS:
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
     void updateGlobalFeeVariables();
+    void receive_from_walletview();
+
+    void on_lineConvertCurrency_textChanged(const QString &arg1);
+
+    void on_copyPacs_clicked();
 
 Q_SIGNALS:
     // Fired when a message should be reported to the user

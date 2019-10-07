@@ -1,6 +1,7 @@
 #include "darksendconfig.h"
 #include "ui_darksendconfig.h"
 
+#include "guiutil.h"
 #include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "optionsmodel.h"
@@ -18,6 +19,13 @@ DarksendConfig::DarksendConfig(QWidget *parent) :
     model(0)
 {
     ui->setupUi(this);
+
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
 
     connect(ui->buttonBasic, SIGNAL(clicked()), this, SLOT(clickBasic()));
     connect(ui->buttonHigh, SIGNAL(clicked()), this, SLOT(clickHigh()));

@@ -25,12 +25,14 @@
 
 #include <boost/thread.hpp>
 
+#include <QFontDatabase>
 #include <QDataWidgetMapper>
 #include <QDir>
 #include <QIntValidator>
 #include <QLocale>
 #include <QMessageBox>
 #include <QTimer>
+#include <QFont>
 
 #ifdef ENABLE_WALLET
 extern CWallet* pwalletMain;
@@ -74,12 +76,12 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     /* Window elements init */
 #ifdef Q_OS_MAC
     /* remove Window tab on Mac */
-    ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->tabWindow));
+    ui->tabWidget_OptionsDialog->removeTab(ui->tabWidget_OptionsDialog->indexOf(ui->tabWindow));
 #endif
 
     /* remove Wallet tab in case of -disablewallet */
     if (!enableWallet) {
-        ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->tabWallet));
+        ui->tabWidget_OptionsDialog->removeTab(ui->tabWidget_OptionsDialog->indexOf(ui->tabWallet));
     }
 
     /* Display elements init */
@@ -92,13 +94,22 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     }
     
     /* Theme selector */
-    ui->theme->addItem(QString("(default)"), QVariant("light"));
-    //ui->theme->addItem(QString("PAC-light"), QVariant("light"));
-    //ui->theme->addItem(QString("PAC-light-hires"), QVariant("light-hires"));
-    //ui->theme->addItem(QString("PAC-blue"), QVariant("drkblue"));
-    //ui->theme->addItem(QString("PAC-Crownium"), QVariant("crownium"));
-    //ui->theme->addItem(QString("PAC-traditional"), QVariant("trad"));
-    
+    ui->theme->addItem(QString("pac theme"), QVariant("pac"));
+    ui->theme->setCurrentIndex(1);
+
+    /* typography selector */
+    //ui->cboFontType->addItem(QString("PAC Default Font"), QVariant("Volte Rounded"));
+    ui->cboFontType->addItem(QString("Volte Rounded"), QVariant("Volte Rounded"));
+    ui->cboFontType->addItem(QString("Gotham Medium"), QVariant("Gotham Medium"));
+    ui->cboFontType->addItem(QString("Gotham Bold"), QVariant("Gotham Bold"));
+
+    /* Gets and loads in the combo box the whole list of fonts available on your OS */
+    QFontDatabase database;
+    for(int i = 0; i < database.families().count(); i++){
+        ui->cboFontType->addItem(QString(database.families().at(i)), QVariant(database.families().at(i)));
+    }
+    ui->cboFontType->setCurrentIndex(1);
+
     /* Language selector */
     QDir translations(":translations");
     ui->lang->addItem(QString("(") + tr("default") + QString(")"), QVariant(""));
@@ -192,6 +203,8 @@ void OptionsDialog::setModel(OptionsModel *model)
     connect(ui->theme, SIGNAL(valueChanged()), this, SLOT(showRestartWarning()));
     connect(ui->lang, SIGNAL(valueChanged()), this, SLOT(showRestartWarning()));
     connect(ui->thirdPartyTxUrls, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
+    connect(ui->cboFontType, SIGNAL(valueChanged()), this, SLOT(showRestartWarning()));
+
 }
 
 void OptionsDialog::setMapper()
@@ -236,6 +249,8 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
+    mapper->addMapping(ui->cboFontType, OptionsModel::FontType);
+
 
 }
 

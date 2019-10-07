@@ -5,6 +5,7 @@
 #include "clientmodel.h"
 #include "init.h"
 #include "guiutil.h"
+#include "guiconstants.h"
 #include "masternode-sync.h"
 #include "masternodeconfig.h"
 #include "masternodeman.h"
@@ -13,6 +14,7 @@
 #include "walletmodel.h"
 
 #include <QTimer>
+#include <QColor>
 #include <QMessageBox>
 
 int GetOffsetFromUtc()
@@ -35,6 +37,12 @@ MasternodeList::MasternodeList(const PlatformStyle *platformStyle, QWidget *pare
     ui->setupUi(this);
 
     ui->startButton->setEnabled(false);
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
 
     int columnAliasWidth = 100;
     int columnAddressWidth = 200;
@@ -56,6 +64,12 @@ MasternodeList::MasternodeList(const PlatformStyle *platformStyle, QWidget *pare
     ui->tableWidgetMasternodes->setColumnWidth(3, columnActiveWidth);
     ui->tableWidgetMasternodes->setColumnWidth(4, columnLastSeenWidth);
 
+    ui->tableWidgetMasternodes->setAlternatingRowColors(false);
+    ui->tableWidgetMasternodes->setShowGrid(false);
+
+    ui->tableWidgetMyMasternodes->setAlternatingRowColors(false);
+    ui->tableWidgetMyMasternodes->setShowGrid(false);
+    
     ui->tableWidgetMyMasternodes->setContextMenuPolicy(Qt::CustomContextMenu);
 
     QAction *startAliasAction = new QAction(tr("Start alias"), this);
@@ -68,6 +82,11 @@ MasternodeList::MasternodeList(const PlatformStyle *platformStyle, QWidget *pare
     connect(timer, SIGNAL(timeout()), this, SLOT(updateNodeList()));
     connect(timer, SIGNAL(timeout()), this, SLOT(updateMyNodeList()));
     timer->start(1000);
+
+    /*QLabel *lblMasternodes = new QLabel;
+    lblMasternodes->setText("MASTERNODES");
+    lblMasternodes->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
+    lblMasternodes->setParent(this);*/
 
     fFilterUpdated = false;
     nTimeFilterUpdated = GetTime();
@@ -276,6 +295,9 @@ void MasternodeList::updateNodeList()
     std::map<COutPoint, CMasternode> mapMasternodes = mnodeman.GetFullMasternodeMap();
     int offsetFromUtc = GetOffsetFromUtc();
 
+    QBrush notEnabled;
+    notEnabled.setColor(COLOR_NEGATIVE);
+
     for(auto& mnpair : mapMasternodes)
     {
         CMasternode mn = mnpair.second;
@@ -303,6 +325,8 @@ void MasternodeList::updateNodeList()
         ui->tableWidgetMasternodes->setItem(0, 0, addressItem);
         ui->tableWidgetMasternodes->setItem(0, 1, protocolItem);
         ui->tableWidgetMasternodes->setItem(0, 2, statusItem);
+        if(statusItem->text()!="ENABLED")
+            ui->tableWidgetMasternodes->item(0,2)->setForeground(notEnabled);
         ui->tableWidgetMasternodes->setItem(0, 3, activeSecondsItem);
         ui->tableWidgetMasternodes->setItem(0, 4, lastSeenItem);
         ui->tableWidgetMasternodes->setItem(0, 5, pubkeyItem);

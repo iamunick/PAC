@@ -141,7 +141,7 @@ void ReceiveRequestDialog::update()
     html += "<html><font face='verdana, arial, helvetica, sans-serif'>";
     html += "<b>"+tr("Payment information")+"</b><br>";
     html += "<b>"+tr("URI")+"</b>: ";
-    html += "<a href=\""+uri+"\">" + GUIUtil::HtmlEscape(uri) + "</a><br>";
+    html += "<a style=\"color:#F4EA13\" href=\""+uri+"\">" + GUIUtil::HtmlEscape(uri) + "</a><br>";
     html += "<b>"+tr("Address")+"</b>: " + GUIUtil::HtmlEscape(info.address) + "<br>";
     if(info.amount)
         html += "<b>"+tr("Amount")+"</b>: " + BitcoinUnits::formatHtmlWithUnit(model->getDisplayUnit(), info.amount) + "<br>";
@@ -150,6 +150,8 @@ void ReceiveRequestDialog::update()
     if(!info.message.isEmpty())
         html += "<b>"+tr("Message")+"</b>: " + GUIUtil::HtmlEscape(info.message) + "<br>";
     html += "<b>"+tr("InstantPAC")+"</b>: " + (info.fUseInstantSend ? tr("Yes") : tr("No")) + "<br>";
+    ui->outUri->setObjectName("outuri");
+    ui->outUri->setStyleSheet("#outuri {background-color: #1a1a1a; color: #fff;}");
     ui->outUri->setText(html);
 
 #ifdef USE_QRCODE

@@ -17,7 +17,12 @@
 #include <QMenu>
 #include <QPoint>
 #include <QPushButton>
+#include <QToolButton>
 #include <QSystemTrayIcon>
+#include <boost/filesystem/path.hpp>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 class ClientModel;
 class NetworkStyle;
@@ -98,6 +103,7 @@ private:
     QAction *overviewAction;
     QAction *historyAction;
     QAction *masternodeAction;
+    QAction *privateAction;
     QAction *proposalAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -137,12 +143,30 @@ private:
     HelpMessageDialog *helpMessageDialog;
     ModalOverlay *modalOverlay;
 
+    QFrame *headerFrame;
+    QPushButton *btnImg;
+    QToolButton *btnRefresh;
+    QToolButton *btnCopyNews;
+    QLabel *messageLabel;
+
+    QNetworkAccessManager *managerCurrency;
+    QNetworkRequest requestCurrency;
+    QNetworkAccessManager *managerNews;
+    QNetworkRequest requestNews;
+
+    QPixmap backgroundImage;
+    QPalette palette;
+
+    /** override events */
+    virtual void resizeEvent(QResizeEvent *event);
+
     /** Keep track of previous number of blocks, to detect progress */
     int prevBlocks;
     int spinnerFrame;
 
     const PlatformStyle *platformStyle;
 
+    void setProfileImage();
     /** Create the main UI actions. */
     void createActions();
     /** Create the menu bar and sub-menus. */
@@ -153,7 +177,8 @@ private:
     void createTrayIcon(const NetworkStyle *networkStyle);
     /** Create system tray menu (or setup the dock menu) */
     void createIconMenu(QMenu *pmenu);
-
+    /** Create the top header bar where the message and profile picture will be located*/
+    void createHeaderBar();
     /** Enable or disable all wallet-related actions */
     void setWalletActionsEnabled(bool enabled);
 
@@ -172,6 +197,9 @@ Q_SIGNALS:
     void receivedURI(const QString &uri);
     /** Restart handling */
     void requestedRestart(QStringList args);
+
+    /** Refresh PAC value to the walletframe */
+    void transmit_to_walletframe();
 
 public Q_SLOTS:
     /** Set number of connections shown in the UI */
@@ -219,6 +247,8 @@ private Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
+    /** Switch to private (section) page */
+    void gotoPrivatePage();
     /** Switch to masternode page */
     void gotoMasternodePage();
     /** Switch to proposal page */
@@ -233,9 +263,21 @@ private Q_SLOTS:
     /** Show Sign/Verify Message dialog and switch to verify message tab */
     void gotoVerifyMessageTab(QString addr = "");
 
+    /** API PAC_USD request */
+    void managerCurrencyFinished(QNetworkReply *replyC);
+    /** API News request */
+    void managerNewsFinished(QNetworkReply *replyN);
+    /** Copy the text of the news */
+    void copyNews();
+    /** Refresh the news and the PAC value */
+    void refreshNewsPacValue();
+
+
     /** Show open dialog */
     void openClicked();
 #endif // ENABLE_WALLET
+    /** It will open a file picker to choose the image file*/
+    void selectProfileImageFile();
     /** Show configuration dialog */
     void optionsClicked();
     /** Show about dialog */

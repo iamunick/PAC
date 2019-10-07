@@ -47,24 +47,25 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     // Build filter row
     setContentsMargins(0,0,0,0);
 
+
     QHBoxLayout *hlayout = new QHBoxLayout();
-    hlayout->setContentsMargins(0,0,0,0);
+    hlayout->setContentsMargins(0,0,0,8);
     if (platformStyle->getUseExtraSpacing()) {
         hlayout->setSpacing(0);
-        hlayout->addSpacing(6);
     } else {
         hlayout->setSpacing(1);
-        hlayout->addSpacing(5);
     }
     QString theme = GUIUtil::getThemeName();
     watchOnlyWidget = new QComboBox(this);
-    watchOnlyWidget->setFixedWidth(24);
+    watchOnlyWidget->setObjectName("watchOnlyWidget");
+    watchOnlyWidget->setFixedWidth(34);
     watchOnlyWidget->addItem("", TransactionFilterProxy::WatchOnlyFilter_All);
     watchOnlyWidget->addItem(QIcon(":/icons/" + theme + "/eye_plus"), "", TransactionFilterProxy::WatchOnlyFilter_Yes);
     watchOnlyWidget->addItem(QIcon(":/icons/" + theme + "/eye_minus"), "", TransactionFilterProxy::WatchOnlyFilter_No);
     hlayout->addWidget(watchOnlyWidget);
 
     dateWidget = new QComboBox(this);
+    dateWidget->setObjectName("dateWidget");
     if (platformStyle->getUseExtraSpacing()) {
         dateWidget->setFixedWidth(120);
     } else {
@@ -81,6 +82,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     hlayout->addWidget(dateWidget);
 
     typeWidget = new QComboBox(this);
+    typeWidget->setObjectName("typeWidget");
     if (platformStyle->getUseExtraSpacing()) {
         typeWidget->setFixedWidth(TYPE_COLUMN_WIDTH);
     } else {
@@ -122,7 +124,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
         amountWidget->setFixedWidth(125);
     }  
     amountWidget->setValidator(new QDoubleValidator(0, 1e20, 8, this));
-    amountWidget->setObjectName("amountWidget");
+    amountWidget->setObjectName("tAmountWidget");
     hlayout->addWidget(amountWidget);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
@@ -130,6 +132,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     vlayout->setSpacing(0);
 
     QTableView *view = new QTableView(this);
+    view->setObjectName("transactionsTable");
     vlayout->addLayout(hlayout);
     vlayout->addWidget(createDateRangeWidget());
     vlayout->addWidget(view);
@@ -137,12 +140,13 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     int width = view->verticalScrollBar()->sizeHint().width();
     // Cover scroll bar width with spacing
     if (platformStyle->getUseExtraSpacing()) {
-        hlayout->addSpacing(width+2);
+        hlayout->addSpacing(width-20);
     } else {
         hlayout->addSpacing(width);
     }
     // Always show scroll bar
-    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     view->setTabKeyNavigation(false);
     view->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -174,6 +178,14 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     contextMenu->addAction(editLabelAction);
 
     mapperThirdPartyTxUrls = new QSignalMapper(this);
+
+
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
 
     // Connect actions
     connect(mapperThirdPartyTxUrls, SIGNAL(mapped(QString)), this, SLOT(openThirdPartyTxUrl(QString)));
@@ -215,7 +227,8 @@ void TransactionView::setModel(WalletModel *model)
 
         transactionView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         transactionView->setModel(transactionProxyModel);
-        transactionView->setAlternatingRowColors(true);
+        transactionView->setAlternatingRowColors(false);
+        transactionView->setShowGrid(false);
         transactionView->setSelectionBehavior(QAbstractItemView::SelectRows);
         transactionView->setSelectionMode(QAbstractItemView::ExtendedSelection);
         transactionView->setSortingEnabled(true);
@@ -558,7 +571,8 @@ QWidget *TransactionView::createDateRangeWidget()
     QSettings settings;
  
     dateRangeWidget = new QFrame();
-    dateRangeWidget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    dateRangeWidget->setStyleSheet("border:none;");
+    dateRangeWidget->setFrameStyle(QFrame::NoFrame | QFrame::Raised);
     dateRangeWidget->setContentsMargins(1,1,1,1);
     QHBoxLayout *layout = new QHBoxLayout(dateRangeWidget);
     layout->setContentsMargins(0,0,0,0);
@@ -566,6 +580,9 @@ QWidget *TransactionView::createDateRangeWidget()
     layout->addWidget(new QLabel(tr("Range:")));
 
     dateFrom = new QDateTimeEdit(this);
+    dateFrom->setProperty("class","ComboBoxSmall");
+    dateFrom->setProperty("class2","comboBoxRangeDate");
+
     dateFrom->setCalendarPopup(true);
     dateFrom->setMinimumWidth(100);
     // Load persisted FROM date
@@ -575,6 +592,8 @@ QWidget *TransactionView::createDateRangeWidget()
     layout->addWidget(new QLabel(tr("to")));
 
     dateTo = new QDateTimeEdit(this);
+    dateTo->setProperty("class","ComboBoxSmall");
+    dateTo->setProperty("class2","comboBoxRangeDate");
     dateTo->setCalendarPopup(true);
     dateTo->setMinimumWidth(100);
     // Load persisted TO date

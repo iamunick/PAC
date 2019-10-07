@@ -41,6 +41,7 @@ public:
 Q_SIGNALS:
     /** Notify that the user has requested more information about the out-of-sync warning */
     void requestedSyncWarningInfo();
+    void transmit_to_walletview();
 
 private:
     QStackedWidget *walletStack;
@@ -59,6 +60,8 @@ public Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
+    /** Switch to private section page */
+    void gotoPrivatePage();
     /** Switch to masternode page */
     void gotoMasternodePage();
     /** Switch to proposal page */
@@ -90,6 +93,8 @@ public Q_SLOTS:
     void usedReceivingAddresses();
     /** Pass on signal over requested out-of-sync-warning information */
     void outOfSyncWarningClicked();
+    /** Receive the signal to refresh the PAC value */
+    void receive_from_bitcoingui();
 };
 
 #endif // BITCOIN_QT_WALLETFRAME_H

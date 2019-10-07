@@ -48,25 +48,26 @@ ProposalList::ProposalList(const PlatformStyle *platformStyle, QWidget *parent) 
     setContentsMargins(0,0,0,0);
 
     hlayout = new ColumnAlignedLayout();
-    hlayout->setContentsMargins(0,0,0,0);
+    hlayout->setContentsMargins(0,0,0,8);
     hlayout->setSpacing(0);
 
     proposalWidget = new QLineEdit(this);
+    proposalWidget->setObjectName("proposalWidget");
 #if QT_VERSION >= 0x040700
     proposalWidget->setPlaceholderText(tr("Enter proposal name"));
 #endif
-    proposalWidget->setObjectName("proposalWidget");
     hlayout->addWidget(proposalWidget);
 
     amountWidget = new QLineEdit(this);
+    amountWidget->setObjectName("amountWidget");
 #if QT_VERSION >= 0x040700
     amountWidget->setPlaceholderText(tr("Min amount"));
 #endif
     amountWidget->setValidator(new QDoubleValidator(0, 1e20, 8, this));
-    amountWidget->setObjectName("amountWidget");
     hlayout->addWidget(amountWidget);
 
     startDateWidget = new QComboBox(this);
+    startDateWidget->setObjectName("startDateWidget");
     startDateWidget->addItem(tr("All"), All);
     startDateWidget->addItem(tr("Today"), Today);
     startDateWidget->addItem(tr("This week"), ThisWeek);
@@ -78,6 +79,7 @@ ProposalList::ProposalList(const PlatformStyle *platformStyle, QWidget *parent) 
     hlayout->addWidget(startDateWidget);
 
     endDateWidget = new QComboBox(this);
+    endDateWidget->setObjectName("endDateWidget");
     endDateWidget->addItem(tr("All"), All);
     endDateWidget->addItem(tr("Today"), Today);
     endDateWidget->addItem(tr("This week"), ThisWeek);
@@ -89,36 +91,36 @@ ProposalList::ProposalList(const PlatformStyle *platformStyle, QWidget *parent) 
     hlayout->addWidget(endDateWidget);
 
     yesVotesWidget = new QLineEdit(this);
+    yesVotesWidget->setObjectName("yesVotesWidget");
 #if QT_VERSION >= 0x040700
     yesVotesWidget->setPlaceholderText(tr("Min yes votes"));
 #endif
     yesVotesWidget->setValidator(new QIntValidator(0, INT_MAX, this));
-    yesVotesWidget->setObjectName("yesVotesWidget");
     hlayout->addWidget(yesVotesWidget);
 
     noVotesWidget = new QLineEdit(this);
+    noVotesWidget->setObjectName("noVotesWidget");
 #if QT_VERSION >= 0x040700
     noVotesWidget->setPlaceholderText(tr("Min no votes"));
 #endif
     noVotesWidget->setValidator(new QIntValidator(0, INT_MAX, this));
-    noVotesWidget->setObjectName("noVotesWidget");
     hlayout->addWidget(noVotesWidget);
 
 
     absoluteYesVotesWidget = new QLineEdit(this);
+    absoluteYesVotesWidget->setObjectName("absoluteYesVotesWidget");
 #if QT_VERSION >= 0x040700
     absoluteYesVotesWidget->setPlaceholderText(tr("Min abs. yes votes"));
 #endif
     absoluteYesVotesWidget->setValidator(new QIntValidator(INT_MIN, INT_MAX, this));
-    absoluteYesVotesWidget->setObjectName("absoluteYesVotesWidget");
     hlayout->addWidget(absoluteYesVotesWidget);
 
     percentageWidget = new QLineEdit(this);
+    percentageWidget->setObjectName("percentageWidget");
 #if QT_VERSION >= 0x040700
     percentageWidget->setPlaceholderText(tr("Min percentage"));
 #endif
     percentageWidget->setValidator(new QIntValidator(-100, 100, this));
-    percentageWidget->setObjectName("percentageWidget");
     hlayout->addWidget(percentageWidget);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
@@ -137,7 +139,8 @@ ProposalList::ProposalList(const PlatformStyle *platformStyle, QWidget *parent) 
     connect(view->horizontalHeader(), SIGNAL(sectionResized(int,int,int)), SLOT(invalidateAlignedLayout()));
     connect(view->horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(invalidateAlignedLayout()));
 
-    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     view->setTabKeyNavigation(false);
     view->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -213,7 +216,8 @@ ProposalList::ProposalList(const PlatformStyle *platformStyle, QWidget *parent) 
 
     proposalList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     proposalList->setModel(proposalProxyModel);
-    proposalList->setAlternatingRowColors(true);
+    proposalList->setAlternatingRowColors(false);
+    proposalList->setShowGrid(false);
     proposalList->setSelectionBehavior(QAbstractItemView::SelectRows);
     proposalList->setSortingEnabled(true);
     proposalList->sortByColumn(ProposalTableModel::StartDate, Qt::DescendingOrder);
@@ -242,6 +246,13 @@ ProposalList::ProposalList(const PlatformStyle *platformStyle, QWidget *parent) 
     timer->start(1000);
 
     setLayout(vlayout);
+
+    // set the typography correctly
+    QFont selectedFont = GUIUtil::getCustomSelectedFont();
+    QList<QWidget*> widgets = this->findChildren<QWidget*>();
+    for (int i = 0; i < widgets.length(); i++){
+        widgets.at(i)->setFont(selectedFont);
+    }
 }
 
 void ProposalList::invalidateAlignedLayout() {
@@ -542,7 +553,8 @@ QWidget *ProposalList::createStartDateRangeWidget()
     QSettings settings;
  
     startDateRangeWidget = new QFrame();
-    startDateRangeWidget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    startDateRangeWidget->setStyleSheet("border:none;");
+    startDateRangeWidget->setFrameStyle(QFrame::NoFrame | QFrame::Raised);
     startDateRangeWidget->setContentsMargins(1,1,1,1);
     QHBoxLayout *layout = new QHBoxLayout(startDateRangeWidget);
     layout->setContentsMargins(0,0,0,0);
@@ -550,6 +562,8 @@ QWidget *ProposalList::createStartDateRangeWidget()
     layout->addWidget(new QLabel(tr("Start Date:")));
 
     proposalStartDate = new QDateTimeEdit(this);
+    proposalStartDate->setProperty("class2","comboBoxRangeDate");
+
     proposalStartDate->setCalendarPopup(true);
     proposalStartDate->setMinimumWidth(100);
 
@@ -571,7 +585,8 @@ QWidget *ProposalList::createEndDateRangeWidget()
     QSettings settings;
  
     endDateRangeWidget = new QFrame();
-    endDateRangeWidget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    endDateRangeWidget->setStyleSheet("border:none;");
+    endDateRangeWidget->setFrameStyle(QFrame::NoFrame | QFrame::Raised);
     endDateRangeWidget->setContentsMargins(1,1,1,1);
     QHBoxLayout *layout = new QHBoxLayout(endDateRangeWidget);
     layout->setContentsMargins(0,0,0,0);
@@ -579,6 +594,7 @@ QWidget *ProposalList::createEndDateRangeWidget()
     layout->addWidget(new QLabel(tr("End Date:")));
 
     proposalEndDate = new QDateTimeEdit(this);
+    proposalEndDate->setProperty("class2","comboBoxRangeDate");
     proposalEndDate->setCalendarPopup(true);
     proposalEndDate->setMinimumWidth(100);
 
@@ -621,5 +637,5 @@ void ProposalList::endDateRangeChanged()
 void ProposalList::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
-    columnResizingFixer->stretchColumnWidth(ProposalTableModel::Proposal);
+    columnResizingFixer->stretchColumnWidth(ProposalTableModel::Percentage);
 }

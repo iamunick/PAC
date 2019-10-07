@@ -8,6 +8,7 @@
 #include "amount.h"
 #include "masternodelist.h"
 #include "proposallist.h"
+#include "walletframe.h"
 
 #include <QStackedWidget>
 
@@ -21,6 +22,7 @@ class SendCoinsRecipient;
 class TransactionView;
 class WalletModel;
 class AddressBookPage;
+class PrivatePage;
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -71,6 +73,7 @@ private:
 
     TransactionView *transactionView;
     ProposalList *proposalList;
+    PrivatePage *privatePage;
 
     QProgressDialog *progressDialog;
     QLabel *transactionSum;
@@ -89,11 +92,15 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
-
+    /** Switch to private page */
+    void gotoPrivatePage();
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
     void gotoVerifyMessageTab(QString addr = "");
+
+    /** Gets the value of the PAC from walletframe */
+    void receive_from_walletframe();
 
     /** Show incoming transaction notification for new transactions.
 
@@ -141,6 +148,12 @@ Q_SIGNALS:
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
     /** Notify that the out of sync warning icon has been pressed */
     void outOfSyncWarningClicked();
+    /** Refresh the value on the overview */
+    void transmit_to_overview();
+    /** Refresh the value on the sendview */
+    void transmit_to_sendview();
+    /** Refresh the value on the receiveview */
+    void transmit_to_receiveview();
 };
 
 #endif // BITCOIN_QT_WALLETVIEW_H
