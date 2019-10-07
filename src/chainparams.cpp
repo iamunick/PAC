@@ -288,7 +288,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_DIP0008].nThreshold = 10;
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000000512d5");  // 332500
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
@@ -312,12 +312,14 @@ public:
         assert(genesis.hashMerkleRoot == uint256S("0xf3939e4de05e537431ef32bbebd9bc7c4e701f7205d72016f04686557af58dbf"));
 
         vSeeds.clear();
+        vSeeds.push_back(CDNSSeedData("pacglobal.io", "seed2.pacglobal.io"));
+        vSeeds.push_back(CDNSSeedData("pacglobal.io", "seed3.pacglobal.io"));
         vSeeds.push_back(CDNSSeedData("pacnode.net", "seed0.pacnode.net"));
         vSeeds.push_back(CDNSSeedData("pacnode.net", "seed1.pacnode.net"));
-        vSeeds.push_back(CDNSSeedData("pacnode.net", "seed2.pacnode.net"));
-        vSeeds.push_back(CDNSSeedData("pacnode.net", "seed3.pacnode.net"));
         vSeeds.push_back(CDNSSeedData("pacglobal.io", "seed0.pacglobal.io"));
         vSeeds.push_back(CDNSSeedData("pacglobal.io", "seed1.pacglobal.io"));
+        vSeeds.push_back(CDNSSeedData("pacnode.net", "seed2.pacnode.net"));
+        vSeeds.push_back(CDNSSeedData("pacnode.net", "seed3.pacnode.net"));
 
         // PAC addresses start with 'P'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,55);
@@ -356,7 +358,7 @@ public:
 
         vSporkAddresses = {"PGtvidAAsW6a9tMBKmdh2tZ1B3SxFDpdXP"};
         nMinSporkKeys = 1;
-        fBIP9CheckMasternodesUpgraded = false; 
+        fBIP9CheckMasternodesUpgraded = true;
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -374,12 +376,14 @@ public:
             (  280000,  uint256S("0x0000000000003b2680a18e08c41719206c76b05e2eb32f8aa45730246d63b2b7"))
             (  290000,  uint256S("0x00000000000069c1ef2e4f3122e6021177b581fd944c174390f1d3cdcdcc6722"))
             (  300000,  uint256S("0x0000000000001f4f2650510e1ad032f356d2fcb001aafcd5e13a87a259f8e15e"))
+            (  330000,  uint256S("0x816ef933e4ab900d99eecde8d6abb1d2f2b71c001d05f79f5d4b98a67facd143"))
             (  331000,  uint256S("0xec03918f66618c53742a0638d976b2b56807d3e3ca7a7de2d72e920f02fe521e"))
+            (  332000,  uint256S("0xbee2c8b8c12ad020783e241e086440f92054c7ea557c7639c32bc7fa6430a0cd"))
         };
 
         chainTxData = ChainTxData{
-            1550525942, // * UNIX timestamp of last known number of transactions
-            814704,     // * total number of transactions between genesis and that timestamp
+            1570098593, // * UNIX timestamp of last known number of transactions
+            980978,     // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
             0.1         // * estimated number of transactions per second after that timestamp
         };
@@ -419,7 +423,7 @@ public:
         consensus.BIP66Height = 0;
         consensus.DIP0001Height = 1;
         consensus.DIP0003Height = 50;
-        consensus.DIP0003EnforcementHeight = 500;
+        consensus.DIP0003EnforcementHeight = 250;
         consensus.DIP0003EnforcementHash = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
         consensus.powLimit = uint256S("0000fffff0000000000000000000000000000000000000000000000000000000");
         consensus.posLimit = uint256S("007ffff000000000000000000000000000000000000000000000000000000000");
